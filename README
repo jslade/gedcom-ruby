@@ -117,6 +117,12 @@ API Reference
         IO instance, invoking callbacks as the registered contexts are
         recognized.
 
+      def context
+        :: Gives the current context during the parse.  Intended to be
+        used by callbacks to determine the context when the same
+        callback method is used to handle multiple contexts.
+
+
     class Date
 
       def initialize( date_str, calendar=DateType::DEFAULT )
