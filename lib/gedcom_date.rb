@@ -19,6 +19,7 @@
 #
 require 'gedcom_date_parser'
 module GEDCOM
+
     class DatePart < GEDCOM_DATE_PARSER::GEDDate
       
       # Flags
@@ -97,7 +98,34 @@ module GEDCOM
         GEDCOM_DATE_PARSER::DateParser.build_gedcom_date_part_string( self )
       end
       
-    end
+      def <=>( dp )
+        return -1 if has_year? and !dp.has_year?
+        return 1 if !has_year? and dp.has_year?
+        
+        if has_year? and dp.has_year?
+          rc = ( year <=> dp.year )
+          return rc unless rc == 0
+        end
+        
+        return -1 if dp.has_month? and !dp.has_month?
+        return 1 if !dp.has_month? and dp.has_month?
+        
+        if has_month? and dp.has_month?
+          rc = ( month <=> dp.month )
+          return rc unless rc == 0
+        end
+        
+        return -1 if dp.has_day? and !dp.has_day?
+        return 1 if !dp.has_day? and dp.has_day?
+        
+        if has_day? and dp.has_day?
+          rc = ( day <=> dp.day )
+          return rc unless rc == 0
+        end
+        
+        return 0
+      end
+    end #/ DatePart
     
     class Date < GEDCOM_DATE_PARSER::GEDDateValue
       # Calendar types
@@ -125,6 +153,10 @@ module GEDCOM
       DNS = GEDCOM_DATE_PARSER::GCDNS
       DNSCAN = GEDCOM_DATE_PARSER::GCDNSCAN
       DEAD = GEDCOM_DATE_PARSER::GCDEAD
+
+      def Date.safe_new( parm )
+        Date.new( parm ) { |errmsg| }
+      end
 
       def initialize ( date_str, calendar=DateType::DEFAULT )
         begin
@@ -173,6 +205,28 @@ module GEDCOM
         (@flags & (BETWEEN | FROMTO)) != 0 ? true : false
       end
       
+      def <=>( d )
+        if is_date? and d.is_date?
+          rc = ( first <=> d.first )
+          return rc unless rc == 0
+          
+          if is_range? and d.is_range?
+            return ( last <=> d.last )
+          elsif is_range?
+            return 1
+          elsif d.is_range?
+            return -1
+          end
+          
+          return 0
+        elsif is_date?
+          return -1
+        elsif d.is_date?
+          return 1
+        end
+        
+        return format <=> d.format
+      end
     end
     
     class DateType

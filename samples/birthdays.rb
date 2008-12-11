@@ -39,39 +39,33 @@ class Birthday
 end
 
 
-class BirthdayExtractor < GEDCOM::Parser
+class BirthdayExtracter < GEDCOM::Parser
   def initialize
     super
-
-    setPreHandler  [ "INDI" ], method( :startPerson )
-    setPreHandler  [ "INDI", "NAME" ], method( :registerName )
-    setPreHandler  [ "INDI", "BIRT", "DATE" ], method( :registerBirthdate )
-    setPostHandler [ "INDI" ], method( :endPerson )
-
     @currentPerson = nil
     @allBirthdays = []
-  end
+    
+    before %(INDI) do
+      @currentPerson = Birthday.new
+    end
 
-  def startPerson( data, state, parm )
-    @currentPerson = Birthday.new
-  end
+    before %w(INDI NAME) do |data|
+      @currentPerson.name = data if @currentPerson.name == nil
+    end
 
-  def registerName( data, state, parm )
-    @currentPerson.name = data if @currentPerson.name == nil
-  end
-
-  def registerBirthdate( data, state, parm )
-    if @currentPerson.date == nil
-      d = GEDCOM::Date.safe_new( data )
-      if d.is_date? and d.first.has_year? and d.first.has_month?
-        @currentPerson.date = d
+    before %w(INDI BIRT DATE) do |data|
+      if @currentPerson.date == nil
+        d = GEDCOM::Date.safe_new( data )
+        if d.is_date? and d.first.has_year? and d.first.has_month?
+          @currentPerson.date = d
+        end
       end
     end
-  end
 
-  def endPerson( data, state, parm )
-    @allBirthdays.push @currentPerson if @currentPerson.date != nil
-    @currentPerson = nil
+    after %w(INDI) do
+      @allBirthdays.push @currentPerson if @currentPerson.date != nil
+      @currentPerson = nil
+    end
   end
 
   def showPeopleBornIn( month )
@@ -88,7 +82,9 @@ class BirthdayExtractor < GEDCOM::Parser
   def showPeopleBornOn( month, day )
     count = 0
     @allBirthdays.sort.each do |ind|
-      if ind.date.first.month == month && ind.date.first.has_day? && ind.date.first.day == day
+      if ind.date.first.month == month &&
+          ind.date.first.has_day? &&
+          ind.date.first.day == day
         count += 1
         showPerson( ind )
       end
@@ -110,7 +106,7 @@ end
 
 puts "Parsing '#{ARGV[0]}'..."
 
-parser = BirthdayExtractor.new
+parser = BirthdayExtracter.new
 parser.parse ARGV[0]
 
 now = Time.now

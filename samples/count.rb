@@ -24,29 +24,6 @@
 
 require 'gedcom'
 
-class IndividualCounter < GEDCOM::Parser
-  attr_reader :individuals
-  attr_reader :families
-
-  def initialize
-    super
-
-    @individuals = 0
-    @families = 0
-
-    setPreHandler [ "INDI" ], method( :countPerson )
-    setPreHandler [ "FAM" ],  method( :countFamily )
-  end
-
-  def countPerson( data, state, parm )
-    @individuals += 1
-  end
-
-  def countFamily( data, state, parm )
-    @families += 1
-  end
-end
-
 if ARGV.length < 1
   puts "Please specify the name of a GEDCOM file."
   exit(0)
@@ -54,7 +31,19 @@ end
 
 puts "Parsing '#{ARGV[0]}'..."
 
-parser = IndividualCounter.new
+individuals = 0
+families = 0
+
+parser = GEDCOM::Parser.new do
+  before "INDI" do
+    individuals += 1
+  end
+
+  before "FAM" do
+    families += 1
+  end
+end
+
 parser.parse ARGV[0]
 
-puts "There are #{parser.individuals} individuals and #{parser.families} families in '#{ARGV[0]}'."
+puts "There are #{individuals} individuals and #{families} families in '#{ARGV[0]}'."
