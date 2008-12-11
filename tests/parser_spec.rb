@@ -37,6 +37,11 @@ describe Parser do
     count_after.should == 3
   end
 
+  it "should auto-concatenate text" do
+    @parser.after %w(SUBM NAME ADDR) do |text|
+      text.should == "Submitters address\naddress continued here"
+    end
+  end
 
   it "should unwind all the way" do
     after_trlr = false
@@ -50,15 +55,44 @@ describe Parser do
 
   it "should use :any as default" do
     @parser.parse SIMPLE
-    @tag_count[:all].should == 48
+    @tag_count[:all].should == 47
     @tag_count['INDI'].should == 3
     @tag_count['FAM'].should == 1
     @tag_count['FAM_MARR_DATE'].should == 1
   end
 
-
-  it "should parse torture-test cases okay" do
+  it "should handle empty gedcom" do
+    @parser.parse "\n"
+    @tag_count[:all].should == 0
   end
 
+  it "should parse TGC551.ged (\\r)" do
+    @parser.parse "#{GEDCOMS}/TGC551.ged"
+    @tag_count[:all].should == 1653
+  end
+
+  it "should parse TGC551LF.ged (\\r\\n)" do
+    @parser.parse "#{GEDCOMS}/TGC551LF.ged"
+    @tag_count[:all].should == 1653
+  end
+
+  it "should parse TGC55C.ged (\\r)" do
+    @parser.parse "#{GEDCOMS}/TGC55C.ged"
+    @tag_count[:all].should == 1684
+  end
+
+  it "should parse TGC55CLF.ged (\\r\\n) with auto-concat" do
+    @parser.parse "#{GEDCOMS}/TGC55CLF.ged"
+    @parser.after %w(OBJE BLOB) do |data|
+      data.size.should == 458
+    end
+    @tag_count[:all].should == 1684
+  end
+
+  it "should parse TGC55CLF.ged (\\r\\n) without auto-concat" do
+    @parser.auto_concat = false
+    @parser.parse "#{GEDCOMS}/TGC55CLF.ged"
+    @tag_count[:all].should == 2197
+  end
 
 end

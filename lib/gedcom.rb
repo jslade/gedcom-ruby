@@ -18,8 +18,10 @@
 # -------------------------------------------------------------------------
 
 require 'gedcom_date'
+require 'stringio'
 
 module GEDCOM
+  attr_accessor :auto_concat
 
   # Possibly a better way to do this?
   VERSION = "0.2.1"
@@ -31,6 +33,9 @@ module GEDCOM
       @ctxStack = []
       @dataStack = []
       @curlvl = -1
+
+      @auto_concat = true
+
       instance_eval(&block) if block_given?
     end
 
@@ -47,7 +52,11 @@ module GEDCOM
     def parse( file )
       case file
       when String
-        parse_file(file)
+        if file =~ /\n/mo
+          parse_string(file)
+        else
+          parse_file(file)
+        end
       when IO
         parse_io(file)
       else
@@ -76,10 +85,22 @@ module GEDCOM
       end
     end
 
+    def parse_string(str)
+      parse_io(StringIO.new(str))
+    end
+
     def parse_io(io)
-      io.each_line do |line|
+      rs = detect_rs(io)
+      io.each_line(rs) do |line|
         level, tag, rest = line.chop.split( ' ', 3 )
+        next if level.nil? or tag.nil?
         level = level.to_i
+
+        if tag == 'CONT' and @auto_concat
+          concat_data rest
+          next
+        end
+
         unwind_to level
 
         tag, rest = rest, tag if tag =~ /@.*@/
@@ -94,11 +115,23 @@ module GEDCOM
     end
 
     def unwind_to level
-      while level <= @curlvl
+      while @curlvl >= level
         do_after @ctxStack, @dataStack.last
         @ctxStack.pop
         @dataStack.pop
         @curlvl -= 1
+      end
+    end
+
+    def concat_data rest
+      if @dataStack[-1].nil? 
+        @dataStack[-1] = rest
+      else
+        if @ctxStack[-1] == 'BLOB'
+          @dataStack[-1] << rest
+        else
+          @dataStack[-1] << "\n" + rest
+        end
       end
     end
 
@@ -119,6 +152,34 @@ module GEDCOM
     end
 
     ANY = [:any]
+
+    # valid gedcom may use either of \r or \r\n as the record separator.
+    # just in case, also detects simple \n as the separator as well
+    # detects the rs for this string by scanning ahead to the first occurence
+    # of either \r or \n, and checking the character after it
+    def detect_rs io
+      rs = "\x0d"
+      mark = io.pos
+      begin
+        while ch = io.readchar
+          case ch
+          when 0x0d
+            ch2 = io.readchar
+            if ch2 == 0x0a
+              rs = "\x0d\x0a"
+            end
+            break
+          when 0x0a
+            rs = "\x0a"
+            break
+          end
+        end
+      ensure
+        io.pos = mark
+      end
+      rs
+    end
+
   end #/ Parser
 
 end #/ GEDCOM
