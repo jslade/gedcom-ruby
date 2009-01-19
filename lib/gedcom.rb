@@ -97,8 +97,8 @@ module GEDCOM
         next if level.nil? or tag.nil?
         level = level.to_i
 
-        if tag == 'CONT' and @auto_concat
-          concat_data rest
+        if (tag == 'CONT' || tag == 'CONC') and @auto_concat
+          concat_data tag, rest
           next
         end
 
@@ -124,14 +124,19 @@ module GEDCOM
       end
     end
 
-    def concat_data rest
+    def concat_data tag, rest
       if @dataStack[-1].nil? 
         @dataStack[-1] = rest
       else
         if @ctxStack[-1] == 'BLOB'
           @dataStack[-1] << rest
         else
-          @dataStack[-1] << "\n" + rest
+          if tag == 'CONT'
+            @dataStack[-1] << "\n" + rest
+          elsif tag == 'CONC'
+            old = @dataStack[-1].chomp
+            @dataStack[-1] = old + rest
+          end
         end
       end
     end
