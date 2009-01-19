@@ -67,18 +67,27 @@ describe Parser do
   end
 
   it "should parse TGC551.ged (\\r)" do
+    # Should handle CONC and CONT differently
+    @parser.after(["HEAD", "NOTE"]) do |data|
+      expected_text = <<-EOS
+This file demonstrates all tags that are allowed in GEDCOM 5.5. Here are some comments about the HEADER record and comments about where to look for information on the other 9 types of GEDCOM records. Most other records will have their own notes that describe what to look for in that record and what to hope the importing software will find.
+
+Many applications will fail to import these notes. The notes are therefore also provided with the files as a plain-text "Read-Me" file.
+EOS
+      data.should =~ /^#{expected_text}/
+    end
     @parser.parse "#{GEDCOMS}/TGC551.ged"
-    @tag_count[:all].should == 1653
+    @tag_count[:all].should == 1396
   end
 
   it "should parse TGC551LF.ged (\\r\\n)" do
     @parser.parse "#{GEDCOMS}/TGC551LF.ged"
-    @tag_count[:all].should == 1653
+    @tag_count[:all].should == 1396
   end
 
   it "should parse TGC55C.ged (\\r)" do
     @parser.parse "#{GEDCOMS}/TGC55C.ged"
-    @tag_count[:all].should == 1684
+    @tag_count[:all].should == 1420
   end
 
   it "should parse TGC55CLF.ged (\\r\\n) with auto-concat" do
@@ -86,7 +95,7 @@ describe Parser do
     @parser.after %w(OBJE BLOB) do |data|
       data.size.should == 458
     end
-    @tag_count[:all].should == 1684
+    @tag_count[:all].should == 1420
   end
 
   it "should parse TGC55CLF.ged (\\r\\n) without auto-concat" do
