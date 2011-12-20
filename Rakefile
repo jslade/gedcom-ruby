@@ -17,11 +17,11 @@ short_name = full_name.downcase
 # Many of these tasks came from the ruby-hl7 project rakefile
 #
 
-desc 'Default: Run RSpec Tests' 
+desc 'Default: Run RSpec Tests'
 task :default => :spec
 
 # Gem Specification
-spec = Gem::Specification.new do |s| 
+spec = Gem::Specification.new do |s|
   s.name = short_name
   s.version = GEDCOM::VERSION
   s.author = "Phillip Davies"
@@ -30,7 +30,7 @@ spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.summary = "Ruby GEDCOM Parser Library"
   s.rubyforge_project = short_name
-  s.description = "A simple library to enable easy, callback-based parsing of GEDCOM data files" 
+  s.description = "A simple library to enable easy, callback-based parsing of GEDCOM data files"
   s.files = FileList["{lib,ext,samples,tests}/**/*"].to_a
   s.require_path = "lib"
   s.autorequire = short_name
@@ -42,8 +42,8 @@ spec = Gem::Specification.new do |s|
 end
 
 # Gem Task
-Rake::GemPackageTask.new(spec) do |pkg| 
-  pkg.need_tar = true 
+Rake::GemPackageTask.new(spec) do |pkg|
+  pkg.need_tar = true
 end
 
 # RSpec Test Task
@@ -61,7 +61,7 @@ namespace :spec do
     t.libs << $:
     t.rcov = true
   end
-  
+
   desc 'Heckle the Date tests'
   Spec::Rake::SpecTask.new('heckle_dates') do |t|
     t.warning = true
@@ -69,7 +69,7 @@ namespace :spec do
     t.libs << $:
     t.spec_opts << " --heckle GEDCOM::Date"
   end
-  
+
   desc 'Heckle the DatePart test'
   Spec::Rake::SpecTask.new('heckle_dateparts') do |t|
     t.warning = true
@@ -77,9 +77,9 @@ namespace :spec do
     t.libs << $:
     t.spec_opts << " --heckle GEDCOM::DatePart"
   end
-  
+
 end
- 
+
 
 # Clean up Task
 desc 'Clean up all the extras'
@@ -119,7 +119,7 @@ task :release => [:clean, :package] do |t|
   rf.add_release spec.rubyforge_project, spec.name, spec.version.to_s, *files
 end
 
-# Task to install the gem locally 
+# Task to install the gem locally
 desc 'Install the package as a gem'
 task :install_gem => [:clean, :package] do
   sh "sudo gem install pkg/*.gem"
