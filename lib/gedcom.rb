@@ -167,7 +167,7 @@ module GEDCOM
       rs = "\x0d"
       mark = io.pos
       begin
-        while ch = io.readchar
+        while !io.eof && ch = io.readchar
           case ch
           when 0x0d
             ch2 = io.readchar
