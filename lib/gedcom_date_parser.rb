@@ -733,7 +733,7 @@ module GEDCOM_DATE_PARSER
             end
           end
 
-          state = ST_DT_ERROR if( !transitionFound )
+          state = ST_DT_ERROR if( transitionFound == 0 )
         end
 
         raise DateParseException, "error parsing datepart, general" if( state == ST_DT_ERROR )
@@ -899,7 +899,7 @@ module GEDCOM_DATE_PARSER
             end
           end
 
-          state = ST_DV_ERROR if( !transitionFound ) 
+          state = ST_DV_ERROR if( transitionFound == 0 ) 
         end
 
         if( state == ST_DV_ERROR ) 
