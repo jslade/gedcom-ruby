@@ -132,10 +132,10 @@ module GEDCOM
           @dataStack[-1] << rest
         else
           if tag == 'CONT'
-            @dataStack[-1] << "\n" + rest
+            @dataStack[-1] << "\n" + (rest || "")
           elsif tag == 'CONC'
             old = @dataStack[-1].chomp
-            @dataStack[-1] = old + rest
+            @dataStack[-1] = old + (rest || "")
           end
         end
       end
@@ -167,7 +167,7 @@ module GEDCOM
       rs = "\x0d"
       mark = io.pos
       begin
-        while ch = io.readchar
+        while !io.eof && ch = io.readchar
           case ch
           when 0x0d
             ch2 = io.readchar
