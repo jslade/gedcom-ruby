@@ -15,7 +15,7 @@ describe Parser do
       @tag_count[:all] += 1
     end
   end
-  
+
   it "can be initialized with block" do
     parser = GEDCOM::Parser.new do
       before 'INDI' do
@@ -26,10 +26,10 @@ describe Parser do
   it "can count individual tags, before and after" do
     count_before = 0
     count_after = 0
-    @parser.before 'INDI' do |data| 
+    @parser.before 'INDI' do |data|
       count_before += 1
     end
-    @parser.after 'INDI' do |data| 
+    @parser.after 'INDI' do |data|
       count_after += 1
     end
     @parser.parse SIMPLE

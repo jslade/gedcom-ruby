@@ -40,15 +40,15 @@ LIBRUBY_A = lib$(RUBY_SO_NAME)-static.a
 LIBRUBYARG_SHARED = -Wl,-R -Wl,$(libdir) -L$(libdir) -l$(RUBY_SO_NAME)
 LIBRUBYARG_STATIC = -l$(RUBY_SO_NAME)-static
 
-RUBY_EXTCONF_H = 
-CFLAGS   =  -fPIC -O2 -fno-strict-aliasing -pipe    -fPIC 
+RUBY_EXTCONF_H =
+CFLAGS   =  -fPIC -O2 -fno-strict-aliasing -pipe    -fPIC
 INCFLAGS = -I. -I$(topdir) -I$(hdrdir) -I$(srcdir)
-CPPFLAGS =  
-CXXFLAGS = $(CFLAGS) 
-DLDFLAGS = -L.  -rdynamic  -Wl,-soname,$(.TARGET) 
+CPPFLAGS =
+CXXFLAGS = $(CFLAGS)
+DLDFLAGS = -L.  -rdynamic  -Wl,-soname,$(.TARGET)
 LDSHARED = cc -shared
 AR = ar
-EXEEXT = 
+EXEEXT =
 
 RUBY_INSTALL_NAME = ruby18
 RUBY_SO_NAME = ruby18
@@ -66,26 +66,26 @@ COPY = cp
 
 #### End of system configuration section. ####
 
-preload = 
+preload =
 
 libpath = . $(libdir)
 LIBPATH =  -L'.' -L'$(libdir)' -Wl,-R'$(libdir)'
-DEFFILE = 
+DEFFILE =
 
 CLEANFILES = mkmf.log
-DISTCLEANFILES = 
+DISTCLEANFILES =
 
-extout = 
-extout_prefix = 
-target_prefix = 
-LOCAL_LIBS = 
+extout =
+extout_prefix =
+target_prefix =
+LOCAL_LIBS =
 LIBS = $(LIBRUBYARG_SHARED)  -lcrypt -lm  -rpath=/usr/lib:/usr/local/lib -pthread  -lc
 SRCS = gedcom.c gedcom_date.c
 OBJS = gedcom.o gedcom_date.o
 TARGET = _gedcom
 DLLIB = $(TARGET).so
-EXTSTATIC = 
-STATIC_LIB = 
+EXTSTATIC =
+STATIC_LIB =
 
 RUBYCOMMONDIR = $(sitedir)$(target_prefix)
 RUBYLIBDIR    = $(sitelibdir)$(target_prefix)
